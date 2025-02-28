@@ -1,0 +1,23 @@
+---
+title: "Lab 3: COVID-19"
+subtitle: "ESS 330"
+output-dir: "docs"
+type: website
+
+format: 
+  html:
+    self-contained: true
+    
+execute: 
+  echo: true
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(flextable)
+library(zoo)
+
+```
+
+Q1: Easy access to updated data is really important to the work we do and for data analysis.
