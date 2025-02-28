@@ -1,0 +1,12 @@
+title: "Lab 3: COVID-19"
+subtitle: "ESS 330"
+output-dir: "docs"
+type: website
+
+format: 
+  html:
+    self-contained: true
+    
+execute: 
+  echo: true
+editor: visual
