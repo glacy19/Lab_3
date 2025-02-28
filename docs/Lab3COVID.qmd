@@ -1,5 +1,18 @@
 ---
-title: "Lab3COVID"
-format: html
+title: "Lab 3: COVID-19"
+subtitle: "Ecosystem Science and Sustianabilty 330"
+author:
+  - name: Genesis Lacy 
+    email: glacy19@colostate.edu
+output-dir: "docs"
+
+format: 
+  html:
+    self-contained: true
+    
+execute: 
+  echo: true
+editor: visual
+
 ---
 
