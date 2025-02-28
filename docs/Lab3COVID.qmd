@@ -15,4 +15,21 @@ execute:
 editor: visual
 
 ---
+Q1: Easy access to open data is important to provide transparency with the public as well as providing data for those intersted in the results and for people who are interested and/or are working on data analysis. 
+
+
+```{r}
+library(tidyverse); library(flextable)
+data = read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv')
+```
+
+
+
+
+
+
+
+
+
+
 
