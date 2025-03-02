@@ -15,12 +15,45 @@ execute:
 editor: visual
 
 ---
-Q1: Easy access to open data is important to provide transparency with the public as well as providing data for those intersted in the results and for people who are interested and/or are working on data analysis. 
+Q1: Easy access to open data is important to provide transparency with the public as well as providing data for those interested in the results and for people who are interested and/or are working on data analysis. 
+
+```{r}
+url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+read.csv(url)
+
+```
 
 
+Q2: 
 ```{r}
 library(tidyverse); library(flextable)
 data = read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv')
+
+my.date <- as.Date("2002-02-01")
+my.state <- "Colorado"
+
+co_data <- data %>%
+  filter(state == my.state) %>%
+  arrange(county, date) %>%
+  group_by(county) %>%
+  mutate(new_cases = cases - lag(cases, default = first (cases)),
+        new_deaths = deaths - lag (deaths, default = first(deaths))) %>%
+  ungroup()
+
+latest_data  <- co_data %>%
+  filter(date == my.date)
+
+top5_cumulative_cases <- latest_data %>%
+  arrange(desc(cases)) %>%
+  slice_head(n = 5) %>%
+  select(county, cases)
+  
+top5_new_cases <- latest_data %>%
+  arrange(desc(new_cases)) %>%
+  slice_head(n = 5) %>%
+  select(county, new_cases)
+
+
 ```
 
 
