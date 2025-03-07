@@ -21,15 +21,16 @@ Q1: Easy access to open data is important to provide transparency with the publi
 url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
 read.csv(url)
 
+
 ```
 
-Q2: Creating a subset to generate cumulative cases and new cases for the top 5 counties. 
+Q2: Creating a subset to generate cumulative cases and new cases for the top 5 counties.
 
 ```{r}
 library(tidyverse); library(flextable)
 data = read_csv('https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv')
 
-my.date <- as.Date("2002-02-01")
+my.date <- as.Date("2022-02-01")
 my.state <- "Colorado"
 
 co_data <- data %>%
@@ -41,7 +42,6 @@ co_data <- data %>%
   ungroup()
 
 ```
-
 
 ```{r}
 latest_data <- co_data %>%
@@ -66,6 +66,68 @@ top5_new_cases %>%
   set_caption("Top 5 counties by new cases")
 ```
 
+Q3:Normalizing Data - adding population data
 
 
-Q3:
+```{r}
+pop_url <- 'https://www2.census.gov/programs-surveys/popest/datasets/2020-2023/counties/totals/co-est2023-alldata.csv'
+pop_data <- read_csv(pop_url)
+
+pop_data <- pop_data %>%
+  mutate(
+    STATE = str_pad(as.character(STATE), 2, pad = "0"),
+    COUNTY = str_pad(as.character(COUNTY), 3, pad = "0"),
+    FIPS = paste0(STATE, COUNTY)
+  
+  ) %>%
+  filter(COUNTY != "000") %>%
+  select(FIPS,STNAME,CTYNAME, contains("2021"))
+
+glimpse(pop_data)
+
+
+
+```
+
+After Modification we're only looking at columns we filtered to contain "2021" and "name". A lot of the values are doubles and there are also a few characters. 
+
+What are the range of populations seen in Colorado counties in 2021?
+
+```{r}
+co_data <- co_data %>%
+  left_join(pop_data, by = c("fips" = "FIPS"))
+
+co_data <- co_data %>%
+  mutate(
+    pop_2021 = coalesce(POPESTIMATE2021.x, 1) ,
+    cumulative_per_capita = cases / pop_2021,
+    new_cases_per_capita = new_cases / pop_2021, 
+    new_deaths_per_capita = new_deaths / pop_2021
+  )
+  
+  latest_data <- co_data %>%
+    filter(date == my.date)
+  
+top_cumulative_per_capita <- latest_data%>%
+  arrange(desc(cumulative_per_capita))%>%
+  slice_head(n = 5)%>%
+  select(county, cumulative_per_capita)%>%
+  flextable()%>%
+  set_caption("Top 5 Counties by Cumulative Cases per Capita")
+
+top_new_per_capita <- latest_data%>%
+  arrange(desc(new_cases_per_capita))%>%
+  slice_head(n = 5)%>%
+  select(county, new_cases_per_capita)%>%
+  flextable()%>%
+  set_caption("Top 5 Counties by New Cases per Capita")
+
+top_cumulative_per_capita
+top_new_per_capita
+```
+
+Q4:
+
+
+
+
