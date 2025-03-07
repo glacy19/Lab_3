@@ -23,7 +23,7 @@ read.csv(url)
 
 ```
 
-Q2:
+Q2: Creating a subset to generate cumulative cases and new cases for the top 5 counties. 
 
 ```{r}
 library(tidyverse); library(flextable)
@@ -40,6 +40,10 @@ co_data <- data %>%
         new_deaths = deaths - lag (deaths, default = first(deaths))) %>%
   ungroup()
 
+```
+
+
+```{r}
 latest_data <- co_data %>%
   filter(date == my.date)
 
@@ -60,5 +64,8 @@ top5_cumulative_cases %>%
 top5_new_cases %>%
   flextable() %>%
   set_caption("Top 5 counties by new cases")
-
 ```
+
+
+
+Q3:
