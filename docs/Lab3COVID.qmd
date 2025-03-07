@@ -99,7 +99,7 @@ co_data <- co_data %>%
 
 co_data <- co_data %>%
   mutate(
-    pop_2021 = coalesce(POPESTIMATE2021.x, 1) ,
+    pop_2021 = coalesce(POPESTIMATE2021, 1) ,
     cumulative_per_capita = cases / pop_2021,
     new_cases_per_capita = new_cases / pop_2021, 
     new_deaths_per_capita = new_deaths / pop_2021
@@ -125,8 +125,43 @@ top_new_per_capita <- latest_data%>%
 top_cumulative_per_capita
 top_new_per_capita
 ```
+Q4: Rolling Thresholds - Filtering the merged COVID/ Population data to only include the past 14 days. 
 
-Q4:
+```{r}
+library(tidyverse)
+my.date <- as.Date("2022-02-01")
+date_14_days_ago <- my.date - 14
+
+co_last_14 <- co_data%>%
+  filter(date >= date_14_days_ago & date <= my.date)
+county_14d_summary <- co_last_14%>%
+  group_by(county)%>%
+  summarize(
+    total_new_cases = sum(new_cases, na.rm = TRUE),
+    population = first(pop_2021),
+    new_cases_per_100k = (total_new_cases / population) * 100000) %>%
+    
+ungroup()
+
+top5_new_cases <- county_14d_summary%>%
+  arrange(desc(new_cases_per_100k)) %>%
+  slice_head(n = 5)%>%
+  select(county, new_cases_per_100k) %>%
+  flextable() %>%
+  set_caption("Top 5 Counties by New Cases per 100,000 residents in the last 14 days")
+
+watch_list_count <- county_14d_summary%>%
+  filter(new_cases_per_100k > 100) %>%
+  nrow()
+
+top5_new_cases
+
+```
+Counties that meet the watch list conditions: 
+```{r}
+
+```
+
 
 
 
