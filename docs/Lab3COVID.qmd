@@ -21,7 +21,6 @@ Q1: Easy access to open data is important to provide transparency with the publi
 url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
 read.csv(url)
 
-
 ```
 
 Q2: Creating a subset to generate cumulative cases and new cases for the top 5 counties.
@@ -157,11 +156,12 @@ watch_list_count <- county_14d_summary%>%
 top5_new_cases
 
 ```
-Counties that meet the watch list conditions: 
+Counties that meet the watch list conditions
 ```{r}
-
+print(watch_list_count)
 ```
 
+Q5: Death toll
 
 
 
