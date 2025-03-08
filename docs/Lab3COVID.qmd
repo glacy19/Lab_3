@@ -161,7 +161,37 @@ Counties that meet the watch list conditions
 print(watch_list_count)
 ```
 
-Q5: Death toll
+Q5: Death toll- finding the ratio of total COVID deaths per county in 2021 of all recorded deaths. Create a plot that visualizes all counties where COVID deaths account for 20% or more of the annual death toll. 
+```{r}
+covid_deaths_2021 <- co_data %>%
+  filter(year(date) == 2021) %>%
+  group_by(county) %>%
+  summarize(total_covid_deaths = sum(new_deaths, na.rm = TRUE)) %>%
+  ungroup()
+
+death_data <- covid_deaths_2021%>%
+  left_join(pop_data, by = "FIPS") %>%
+  select(county, total_covid_deaths, total_deaths_2021) %>%
+  mutate(
+    covid_death_pct = (total_covid_deaths / total_deaths_2021) * 100
+  )
+
+high_impact_counties <- death_data%>%
+  filter(covid_death_pct >= 20)
+
+ggplot(high_impact_counties, aes(x = reorder(county, covid_death_pct), y = covid_death_pct)) +
+  geom_col(fill = "red") +
+  coord_flip()+ 
+  labs(
+    title = "Counties where COVID-19 Deaths Account for 20% of all Deaths in 2021",
+x = "County",
+y = "Percentage of Total Deaths (%)"
+  ) +
+  theme_minimal()
+```
+
+
+Q6: Looking at the story of New York, Colorado,Alabama and Ohio, make a faceted bar plot showing the number of daily, new cases at the state level. 
 
 
 
