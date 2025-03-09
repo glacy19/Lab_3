@@ -192,8 +192,6 @@ Q5: Death toll- finding the ratio of total COVID deaths per county in 2021 of al
 
 
 ```{r}
-pop_data <- pop_data %>%
-  rename(county = county)
 
 covid_deaths_2021 <- co_data %>%
   filter(year(date) == 2021) %>%
