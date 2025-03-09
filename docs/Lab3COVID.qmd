@@ -161,6 +161,18 @@ Counties that meet the watch list conditions
 print(watch_list_count)
 ```
 
+
+
+```{r}
+
+colnames(pop_data)
+```
+
+
+
+
+
+
 Q5: Death toll- finding the ratio of total COVID deaths per county in 2021 of all recorded deaths. Create a plot that visualizes all counties where COVID deaths account for 20% or more of the annual death toll. 
 ```{r}
 covid_deaths_2021 <- co_data %>%
@@ -168,6 +180,7 @@ covid_deaths_2021 <- co_data %>%
   group_by(county) %>%
   summarize(total_covid_deaths = sum(new_deaths, na.rm = TRUE)) %>%
   ungroup()
+
 
 death_data <- covid_deaths_2021%>%
   left_join(pop_data, by = "FIPS") %>%
