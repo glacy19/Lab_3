@@ -15,7 +15,11 @@ execute:
 editor: visual
 ---
 
+
+
 Q1: Easy access to open data is important to provide transparency with the public as well as providing data for those interested in the results and for people who are interested and/or are working on data analysis.
+
+
 
 ```{r}
 url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
@@ -23,7 +27,11 @@ read.csv(url)
 
 ```
 
+
+
 Q2: Creating a subset to generate cumulative cases and new cases for the top 5 counties.
+
+
 
 ```{r}
 library(tidyverse); library(flextable)
@@ -65,7 +73,11 @@ top5_new_cases %>%
   set_caption("Top 5 counties by new cases")
 ```
 
+
+
 Q3:Normalizing Data - adding population data
+
+
 
 
 ```{r}
@@ -88,9 +100,13 @@ glimpse(pop_data)
 
 ```
 
+
+
 After Modification we're only looking at columns we filtered to contain "2021" and "name". A lot of the values are doubles and there are also a few characters. 
 
 What are the range of populations seen in Colorado counties in 2021?
+
+
 
 ```{r}
 co_data <- co_data %>%
@@ -124,7 +140,11 @@ top_new_per_capita <- latest_data%>%
 top_cumulative_per_capita
 top_new_per_capita
 ```
+
+
 Q4: Rolling Thresholds - Filtering the merged COVID/ Population data to only include the past 14 days. 
+
+
 
 ```{r}
 library(tidyverse)
@@ -156,12 +176,20 @@ watch_list_count <- county_14d_summary%>%
 top5_new_cases
 
 ```
+
+
 Counties that meet the watch list conditions
+
+
 ```{r}
 print(watch_list_count)
 ```
 
+
+
 Q5: Death toll- finding the ratio of total COVID deaths per county in 2021 of all recorded deaths. Create a plot that visualizes all counties where COVID deaths account for 20% or more of the annual death toll. 
+
+
 
 ```{r}
 pop_data <- pop_data %>%
@@ -195,7 +223,10 @@ y = "Percentage of Total Deaths (%)"
 ```
 
 
+
+
 Q6: Looking at the story of New York, Colorado,Alabama and Ohio, make a faceted bar plot showing the number of daily, new cases at the state level. 
+
 
 
 
