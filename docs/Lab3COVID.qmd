@@ -1,6 +1,6 @@
 ---
 title: "Lab 3: COVID-19"
-subtitle: "Ecosystem Science and Sustianabilty 330"
+subtitle: "Ecosystem Science and Sustainabilty 330"
 author:
   - name: Genesis Lacy 
     email: glacy19@colostate.edu
@@ -166,19 +166,31 @@ Q5: Death toll- finding the ratio of total COVID deaths per county in 2021 of al
 ```{r}
 
 covid_deaths_2021 <- co_data %>%
-  filter(year(date) == 2021) %>%
-  group_by(FIPS, county) %>%
+  filter(lubridate::year(date) == 2021) %>%
+  group_by(fips, county) %>%
   summarize(total_covid_deaths = sum(new_deaths, na.rm = TRUE)) %>%
   ungroup()
 
+covid_deaths_2021 <- covid_deaths_2021 %>%
+  mutate(fips = as.character(fips))
+
+pop_data <- pop_data %>%
+  mutate(FIPS = as.character(FIPS))
+
+pop_data%>%
+  rename(FIPS = FIPS) %>%
+
 death_data <- covid_deaths_2021%>%
-  left_join(pop_data%>% select(FIPS, county,DEATHS2021), by ="FIPS")
+  left_join(pop_data%>% select(FIPS,CTYNAME,DEATHS2021), by ="FIPS")
             
  death_data <- death_data %>%
-   mutate(covid_death_pct = (total_covid_deaths /DEATHS2021) * 100)
+   mutate(covid_death_pct = (total_covid_deaths /DEATHS2021) * 100) %>%
+   filter(!is.na(covid_death_pct))
+   
  high_covid_impact <- death_data%>%
  filter(covid_death_pct >= 20)
  
+
 library(ggplot2)
 
 ggplot(high_covid_impact, aes(x = reorder(county.x,covid_death_pct), y = covid_death_pct)) +
@@ -194,6 +206,63 @@ y = "Percentage of Total Deaths (%)"
 
 
 Q6: Looking at the story of New York, Colorado,Alabama and Ohio, make a faceted bar plot showing the number of daily, new cases at the state level. 
+```{r}
+library(dplyr)
+
+selected_states <- c("New York", "Colorado", "Alabama", "Ohio")
+
+state_covid_data <- covid_data %>%
+  filter(state %in% selected_states) %>%
+  group_by(state, date) %>%
+  summarize(
+    total_cases = sum(cases, na.rm = TRUE),
+    total_new_cases = sum(cases - lag(cases, default = first(cases)), na.rm = TRUE)
+  ) %>%
+ungroup()
+
+arrange(state, date)
+
+state_covid_data<- state_covid_data%>%
+  group_by(state) %>%
+  mutate(
+    rolling_avg_new_cases = rollmean(total_new_cases, k = 7, fill = NA, align = "right")) %>%
+ungroup()
+
+ggplot(state_covid_data, aes(x = date, y = total_new_cases, fill = state)) +
+  geom_col(show.legend = FALSE, alpha = 0.6)+
+  geom_line(aes(y = rolling_avg_new_cases, color = state, size = 1.2) +
+  facet_wrap(~state, scales = "free_y") +
+  theme_minimal()+
+  labs(
+    title = "Daily New COVID Cases with 7 day Rolling Mean"),
+  x = "Date",
+  y = "New Cases",
+  caption = "Data Source: NY Times COVID-19 Dataset"
+  )+
+  theme(legend.position = "bottom")
+              
+state_pop_data <- pop_data %%
+  group_by(state)%>%
+  summarize(population = sum(POPESTIMATE2021))
+
+state_covid_per_capita <- state_covid_data %>%
+  left_join(state_pop_data, by = "state") %>%
+  mutate(
+    cases_per_100k = (total_new_Cases / population) * 100000,
+    rolling_avg_per_100k = rollmean(cases_per_100k, k = 7, fill = NA, align = "right")
+  )
+
+ggplot(state_covid_per_capita, aes(x = date, y = rolling_avg_per_100k, color = state))+
+  geom_line(size = 1.2) +
+  theme_minimal()+
+    labs(
+      title = "7 Day Rolling Average of COVID Cases per 100K Populaation",
+      x = "Date",
+      y = "New Cases per 100,000",
+      caption = "Data Source: NY Times COVID-19 Dataset"
+    )+
+theme(legend.position = "bottom")
+```
 
 
 
