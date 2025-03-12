@@ -170,7 +170,7 @@ covid_deaths_2021 <- co_data %>%
   filter(lubridate::year(date) == 2021) %>%
   group_by(fips, county) %>%
   summarize(total_covid_deaths = sum(new_deaths, na.rm = TRUE)) %>%
-  ungroup()
+mutate(fips = as.character(fips))
 
 covid_deaths_2021 <- covid_deaths_2021 %>%
   mutate(fips = as.character(fips))
@@ -180,7 +180,8 @@ pop_data <- pop_data %>%
 
 
 death_data <- covid_deaths_2021%>%
-  left_join(pop_data%>% select(fips, county,total_covid_deaths, by = "FIPS"))
+  left_join(pop_data%>% select(FIPS, CTYNAME, DEATHS2021), by
+             = c("fips" = "FIPS"))
             
 death_data <- death_data %>%
    mutate(covid_death_pct = (total_covid_deaths /DEATHS2021) * 100) %>%
@@ -192,7 +193,7 @@ high_covid_impact <- death_data%>%
 
 library(ggplot2)
 
-ggplot(high_covid_impact, aes(x = reorder(county.x,covid_death_pct), y = covid_death_pct)) +
+ggplot(high_covid_impact, aes(x = reorder(county,covid_death_pct), y = covid_death_pct)) +
   geom_bar( stat = "identity", fill = "maroon")+
   coord_flip()+ 
   labs(
@@ -219,15 +220,14 @@ state_covid_data <- co_data %>%
   group_by(state, date) %>%
   summarize(
     total_cases = sum(cases, na.rm = TRUE),
-    total_new_cases = sum(cases - lag(cases, default = first(cases)), na.rm = TRUE)
-  ) %>%
-ungroup()
-
-state_covid_data<- state_covid_data%>%
-  arrange(date) %>%
+    .groups = "drop"
+  )%>%
   group_by(state) %>%
+  arrange(date, .by_group = TRUE) %>%
   mutate(
+    total_new_cases = total_cases - lag(total_cases, default = first(total_cases)),
     rolling_avg_new_cases = rollmean(total_new_cases, k = 7, fill = NA, align = "right")) %>%
+
 ungroup()
 
 ggplot(state_covid_data, aes(x = date, y = total_new_cases, fill = state)) +
@@ -241,23 +241,21 @@ ggplot(state_covid_data, aes(x = date, y = total_new_cases, fill = state)) +
   y = "New Cases",
   caption = "Data Source: NY Times COVID-19 Dataset",
   )+
-theme(legen.position = "bottom") 
+theme(legend.position = "bottom")
 
-pop_data_co <- pop_data %>% filter(STNAME == "Colorado")
+state_pop_data <- pop_data %>%
+  filter(STNAME %in% selected_states) %>%
+  group_by(STNAME) %>%
+  summarize(population = sum(POPESTIMATE2021, na.rm = TRUE), .groups = "drop") %>%
+  rename(state = STNAME) 
 
-pop_data_co <- pop_data_co %>%
-  rename(state = STNAME)
-
-
-pop_data_co_2021 <- pop_data_co
-  summarize(population = sum(POPESTIMATE2021, na.rm = TRUE))
-
-state_covid_per_capita <- state_covid_data %>%
+state_covid_per_capita <- state_covid_data%>%
   left_join(state_pop_data, by = "state") %>%
   mutate(
-    cases_per_100k = (total_new_Cases / population) * 100000,
+    cases_per_100k = (total_new_cases / population) * 100000,
     rolling_avg_per_100k = rollmean(cases_per_100k, k = 7, fill = NA, align = "right")
   )
+
 
 ggplot(state_covid_per_capita, aes(x = date, y = rolling_avg_per_100k, color = state))+
   geom_line(size = 1.2) +
@@ -270,6 +268,9 @@ ggplot(state_covid_per_capita, aes(x = date, y = rolling_avg_per_100k, color = s
     )+
 theme(legend.position = "bottom")
 ```
+The influence scaling the population had on the analysis: 
+Does it make some states look better? Worse? How so?
+
 
 Q7:
 
