@@ -268,10 +268,52 @@ ggplot(state_covid_per_capita, aes(x = date, y = rolling_avg_per_100k, color = s
     )+
 theme(legend.position = "bottom")
 ```
-The influence scaling the population had on the analysis: 
+The influence scaling the population had on the analysis: I think having the scale of 100K people is good to keep the ratio the same across the board but I also think the scale might need to be re arranged based on population numbers per state. 
+
 Does it make some states look better? Worse? How so?
+I think that the scale can make it more difficult to understand the magnitude of COVID cases again because the data is heavily reliant on population. 
 
 
-Q7:
+Q7:Calculating the weighted mean center of the COVID outbreak in the US
+
+```{r}
+library(dplyr)
+library(readr)
+
+centroids <- read_csv("https://raw.githubusercontent.com/mikejohnson51/csu-ess-330/refs/heads/main/resources/county-centroids.csv")
+
+co_data <- co_data%>%
+  mutate(fips = as.character(fips)) %>%
+  left_join(centroids, by = "fips")
+  
+wmc_data <- co_data %>%
+  group_by(date) %>%
+  summarize(
+  total_cases = sum(cases, na.rm = TRUE),
+  weighted_lon = sum(LON * cases, na.rm = TRUE) / total_cases,
+  weighted_lat = sum(LAT * cases, na.rm = TRUE) / total_cases,
+  month = format(date,"%m")
+) %>%
+ungroup()
+
+ggplot() +
+  border("state", fill = "gray90",color = "white")+
+  geom_point(
+    data - wmc_data,
+    aes(x = weighted_lon, y = weighted_lat, color = month, size = total_cases),
+    alpha = 0.7
+  )+
+  scale_color_viridis_d()+
+  theme_minimal()+ 
+  labs(
+    title = "Weighed Mean Center of COVID Outbreak in the US",
+    x = "Longitude",
+    y = "Latitude",
+    color = "Month",
+    size = "Total Cases"
+  )
+
+```
 
 
+Describe the movement of the COVID weighted mean throughout the US and possible drivers of its movement given your knowledge of the outbreak hot spots. 
