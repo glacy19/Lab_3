@@ -164,6 +164,7 @@ print(watch_list_count)
 Q5: Death toll- finding the ratio of total COVID deaths per county in 2021 of all recorded deaths. Create a plot that visualizes all counties where COVID deaths account for 20% or more of the annual death toll. 
 
 ```{r}
+library(dplyr)
 
 covid_deaths_2021 <- co_data %>%
   filter(lubridate::year(date) == 2021) %>%
@@ -177,17 +178,15 @@ covid_deaths_2021 <- covid_deaths_2021 %>%
 pop_data <- pop_data %>%
   mutate(FIPS = as.character(FIPS))
 
-pop_data%>%
-  rename(FIPS = FIPS) %>%
 
 death_data <- covid_deaths_2021%>%
-  left_join(pop_data%>% select(FIPS,CTYNAME,DEATHS2021), by ="FIPS")
+  left_join(pop_data%>% select(fips, county,total_covid_deaths, by = "FIPS"))
             
- death_data <- death_data %>%
+death_data <- death_data %>%
    mutate(covid_death_pct = (total_covid_deaths /DEATHS2021) * 100) %>%
    filter(!is.na(covid_death_pct))
-   
- high_covid_impact <- death_data%>%
+
+high_covid_impact <- death_data%>%
  filter(covid_death_pct >= 20)
  
 
@@ -272,6 +271,6 @@ ggplot(state_covid_per_capita, aes(x = date, y = rolling_avg_per_100k, color = s
 theme(legend.position = "bottom")
 ```
 
-
+Q7:
 
 
