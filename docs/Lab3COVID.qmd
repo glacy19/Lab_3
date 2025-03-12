@@ -206,6 +206,7 @@ y = "Percentage of Total Deaths (%)"
 
 
 Q6: Looking at the story of New York, Colorado,Alabama and Ohio, make a faceted bar plot showing the number of daily, new cases at the state level. 
+
 ```{r}
 library(dplyr)
 library(zoo)
@@ -243,13 +244,14 @@ ggplot(state_covid_data, aes(x = date, y = total_new_cases, fill = state)) +
   )+
 theme(legen.position = "bottom") 
 
-pop_data %>%
-  rename(state = STNAME)  
-              
-state_pop_data <- pop_data %%
-  group_by(state) %>%
-  summarize(population = sum(POPESTIMATE2021))
+pop_data_co <- pop_data %>% filter(STNAME == "Colorado")
 
+pop_data_co <- pop_data_co %>%
+  rename(state = STNAME)
+
+
+pop_data_co_2021 <- pop_data_co
+  summarize(population = sum(POPESTIMATE2021, na.rm = TRUE))
 
 state_covid_per_capita <- state_covid_data %>%
   left_join(state_pop_data, by = "state") %>%
