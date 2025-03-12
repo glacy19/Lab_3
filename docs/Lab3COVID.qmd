@@ -281,7 +281,7 @@ co_data <- co_data%>%
   left_join(centroids, by = "fips")
 
 co_data <- co_data %>%
-  select(date,fips,cases, deaths, state, county, LON = LON.x, LAT = LAT.x)
+  select(date,fips,cases,deaths,state, county,LON,LAT)
   
 wmc_data <- co_data %>%
   group_by(date) %>%
