@@ -208,10 +208,13 @@ y = "Percentage of Total Deaths (%)"
 Q6: Looking at the story of New York, Colorado,Alabama and Ohio, make a faceted bar plot showing the number of daily, new cases at the state level. 
 ```{r}
 library(dplyr)
+library(zoo)
+
+str(co_data)
 
 selected_states <- c("New York", "Colorado", "Alabama", "Ohio")
 
-state_covid_data <- covid_data %>%
+state_covid_data <- co_data %>%
   filter(state %in% selected_states) %>%
   group_by(state, date) %>%
   summarize(
@@ -220,9 +223,8 @@ state_covid_data <- covid_data %>%
   ) %>%
 ungroup()
 
-arrange(state, date)
-
 state_covid_data<- state_covid_data%>%
+  arrange(date) %>%
   group_by(state) %>%
   mutate(
     rolling_avg_new_cases = rollmean(total_new_cases, k = 7, fill = NA, align = "right")) %>%
@@ -230,20 +232,24 @@ ungroup()
 
 ggplot(state_covid_data, aes(x = date, y = total_new_cases, fill = state)) +
   geom_col(show.legend = FALSE, alpha = 0.6)+
-  geom_line(aes(y = rolling_avg_new_cases, color = state, size = 1.2) +
+  geom_line(aes(y = rolling_avg_new_cases, color = state, linewidth = 1.2)) +
   facet_wrap(~state, scales = "free_y") +
   theme_minimal()+
   labs(
-    title = "Daily New COVID Cases with 7 day Rolling Mean"),
+    title = "Daily New COVID Cases with 7 day Rolling Mean",
   x = "Date",
   y = "New Cases",
-  caption = "Data Source: NY Times COVID-19 Dataset"
+  caption = "Data Source: NY Times COVID-19 Dataset",
   )+
-  theme(legend.position = "bottom")
+theme(legen.position = "bottom") 
+
+pop_data %>%
+  rename(state = STNAME)  
               
 state_pop_data <- pop_data %%
-  group_by(state)%>%
+  group_by(state) %>%
   summarize(population = sum(POPESTIMATE2021))
+
 
 state_covid_per_capita <- state_covid_data %>%
   left_join(state_pop_data, by = "state") %>%
