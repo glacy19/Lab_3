@@ -20,7 +20,6 @@ Q1: Easy access to open data is important to provide transparency with the publi
 ```{r}
 url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
 read.csv(url)
-
 ```
 
 Q2: Creating a subset to generate cumulative cases and new cases for the top 5 counties.
@@ -83,9 +82,6 @@ pop_data <- pop_data %>%
   select(FIPS,STNAME,CTYNAME, contains("2021"))
 
 glimpse(pop_data)
-
-
-
 ```
 
 After Modification we're only looking at columns we filtered to contain "2021" and "name". A lot of the values are doubles and there are also a few characters. 
@@ -285,6 +281,10 @@ centroids <- read_csv("https://raw.githubusercontent.com/mikejohnson51/csu-ess-3
 co_data <- co_data%>%
   mutate(fips = as.character(fips)) %>%
   left_join(centroids, by = "fips")
+
+co_data <- co_data %>%
+  select(-LON.y, -LAT.y, -LON.x.x.x, -LAT.x.x.x, -LAT.y.y.y, -LON.x) %>%
+  rename(LON = LON.x, LAT = LAT.x)
   
 wmc_data <- co_data %>%
   group_by(date) %>%
@@ -292,12 +292,12 @@ wmc_data <- co_data %>%
   total_cases = sum(cases, na.rm = TRUE),
   weighted_lon = sum(LON * cases, na.rm = TRUE) / total_cases,
   weighted_lat = sum(LAT * cases, na.rm = TRUE) / total_cases,
-  month = format(date,"%m")
-) %>%
-ungroup()
+  month = format(date,"%m"),
+  .groups = "drop")
+
 
 ggplot() +
-  border("state", fill = "gray90",color = "white")+
+  borders("state", fill = "gray90", color = "white") +
   geom_point(
     data - wmc_data,
     aes(x = weighted_lon, y = weighted_lat, color = month, size = total_cases),
