@@ -207,8 +207,6 @@ Q6: Looking at the story of New York, Colorado,Alabama and Ohio, make a faceted 
 library(dplyr)
 library(zoo)
 
-str(co_data)
-
 selected_states <- c("New York", "Colorado", "Alabama", "Ohio")
 
 state_covid_data <- co_data %>%
@@ -283,8 +281,7 @@ co_data <- co_data%>%
   left_join(centroids, by = "fips")
 
 co_data <- co_data %>%
-  select(-LON.y, -LAT.y, -LON.x.x.x, -LAT.x.x.x, -LAT.y.y.y, -LON.x) %>%
-  rename(LON = LON.x, LAT = LAT.x)
+  select(date,fips,cases, deaths, state, county, LON = LON.x, LAT = LAT.x)
   
 wmc_data <- co_data %>%
   group_by(date) %>%
@@ -297,13 +294,13 @@ wmc_data <- co_data %>%
 
 
 ggplot() +
-  borders("state", fill = "gray90", color = "white") +
+  borders("state", fill = "gray90", colour = "white") +
   geom_point(
-    data - wmc_data,
+    data = wmc_data,
     aes(x = weighted_lon, y = weighted_lat, color = month, size = total_cases),
     alpha = 0.7
   )+
-  scale_color_viridis_d()+
+  scale_colour_viridis_d() +
   theme_minimal()+ 
   labs(
     title = "Weighed Mean Center of COVID Outbreak in the US",
@@ -317,3 +314,6 @@ ggplot() +
 
 
 Describe the movement of the COVID weighted mean throughout the US and possible drivers of its movement given your knowledge of the outbreak hot spots. 
+
+Based off the plot that was created from my code and knowledge that I have, it's showing that a majority of the COVID cases in the US were in the Denver Metro area and this definitely makes sense since there are so many people living in that area. Possible drivers besides population density can include, access to healthcare, access to vaccines, access to be able to quaratine and more.
+
